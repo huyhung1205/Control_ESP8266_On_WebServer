@@ -201,6 +201,15 @@ void handleMain() {
                             <form menthod='get'><input class='button' type='submit' name='D8' value='OFF'></form>
                         </td>
                     </tr>
+                    <tr>
+                        <td>D</td>
+                        <td>
+                            <form menthod='get'><input class='button' type='submit' name='D' value='ON'></form>
+                        </td>
+                        <td>
+                            <form menthod='get'><input class='button' type='submit' name='D' value='OFF'></form>
+                        </td>
+                    </tr>
                 </table>
         </center>
     </div>
@@ -243,7 +252,7 @@ const int digital[] = { D1, D2, D3, D4, D5, D6, D7, D8 };
 //                  SETUP
 //==============================================================
 void setup() {
-  Serial.begin(115200);  // Khởi tạo kết nối Serial để truyền dữ liệu đến máy tính
+  Serial.begin(9600);  // Khởi tạo kết nối Serial để truyền dữ liệu đến máy tính
   // Cấu hình các chân Digital
   for (int i = 0; i <= 7; i++)
     pinMode(digital[i], OUTPUT);
@@ -268,11 +277,13 @@ void setup() {
     WiFi.softAP("Setup WiFi", "00008888");
     Serial.println("Please connect to WiFi:\nSSID:Setup WiFi\nPassword: 00008888");
     Serial.print("AP IP address: ");
-    Serial.println(WiFi.softAPIP());
+    Serial.print(WiFi.softAPIP());
+    Serial.println("/input");
     // Thiết lập các URL handler cho WebServer trong chế độ AP
     server.on("/input", handleRoot);                  // Phục vụ trang nhập WiFi
     server.on("/setwifi", HTTP_POST, handleSetWiFi);  // Xử lý yêu cầu kết nối WiFi
     server.on("/check", handleCheck);                 // Kiểm tra trạng thái kết nối WiFi
+    server.begin();  // Bắt đầu server
   } else {
     Serial.print("\nConnected to WiFi\nIP address: ");
     Serial.println(WiFi.localIP());
@@ -353,6 +364,16 @@ void loop() {
         } else {
           Serial.print("D8 OFF");
           digitalWrite(D8, LOW);
+        }
+      } else if (server.argName(i) == "D") {
+        if (server.arg(i) == "ON") {
+          Serial.print("ALL ON");
+          for(int i=0;i<=7; i++)
+            digitalWrite(digital[i],1);
+        } else {
+          Serial.print("ALL OFF");
+          for(int i=0;i<=7; i++)
+            digitalWrite(digital[i],0);
         }
       }
       Serial.println("------");
